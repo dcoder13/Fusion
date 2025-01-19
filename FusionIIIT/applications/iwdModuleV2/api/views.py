@@ -1172,5 +1172,19 @@ def handle_settle_bill_requests(request):
     
     return Response({'error': 'Request ID not provided'}, status=status.HTTP_400_BAD_REQUEST)
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_proposal(request):
+    serializer = ProposalSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save(engineer=request.user)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_proposals(request, request_id):
+    proposals = Proposal.objects.filter(request_id=request_id)
+    serializer = ProposalSerializer(proposals, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
 

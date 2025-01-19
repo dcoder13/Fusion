@@ -138,3 +138,8 @@ class LetterOfIntentDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = LetterOfIntentDetails
         fields = '__all__'
+
+class ProposalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Proposal
+        fields = '__all__'
