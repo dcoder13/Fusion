@@ -139,7 +139,38 @@ class LetterOfIntentDetailsSerializer(serializers.ModelSerializer):
         model = LetterOfIntentDetails
         fields = '__all__'
 
+class ItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Item
+        fields = '__all__'
 class ProposalSerializer(serializers.ModelSerializer):
+    items = ItemSerializer(many=True)
     class Meta:
         model = Proposal
         fields = '__all__'
+
+    def create(self, validated_data):
+        items_data = validated_data.pop('items')
+        proposal = Proposal.objects.create(**validated_data)
+        for item_data in items_data:
+            Item.objects.create(proposal=proposal, **item_data)
+        return proposal
+
+    def update(self, instance, validated_data):
+        items_data = validated_data.pop('items')
+        instance.supporting_documents = validated_data.get('supporting_documents', instance.supporting_documents)
+        instance.status = validated_data.get('status', instance.status)
+        instance.save()
+
+        for item_data in items_data:
+            item_id = item_data.get('id')
+            if item_id:
+                item = Item.objects.get(id=item_id, proposal=instance)
+                item.name = item_data.get('name', item.name)
+                item.cost = item_data.get('cost', item.cost)
+                item.quantity = item_data.get('quantity', item.quantity)
+                item.save()
+            else:
+                Item.objects.create(proposal=instance, **item_data)
+
+        return instance

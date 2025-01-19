@@ -200,10 +200,13 @@ class Budget(models.Model):
 class Proposal(models.Model):
     request = models.ForeignKey(Requests, on_delete=models.CASCADE, related_name='proposals')
     engineer = models.CharField(max_length=200) #models.ForeignKey(User, on_delete=models.CASCADE)
-    items = models.TextField()
-    costs = models.DecimalField(max_digits=10, decimal_places=2)
-    quantities = models.IntegerField()
     supporting_documents = models.FileField(upload_to='proposals/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     status = models.CharField(max_length=20, choices=[('Pending', 'Pending'), ('Approved', 'Approved'), ('Rejected', 'Rejected')], default='Pending')
+
+class Item(models.Model):
+    proposal = models.ForeignKey('Proposal', on_delete=models.CASCADE, related_name='items')
+    name = models.CharField(max_length=255)
+    cost = models.DecimalField(max_digits=10, decimal_places=2)
+    quantity = models.IntegerField()
