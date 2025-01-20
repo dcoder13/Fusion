@@ -54,8 +54,7 @@ def create_request(request):
         to create a new request
     '''
     data = request.data
-    data['requestCreatedBy'] = request.user.username 
-    data['requestCreatedBy'] = request.user.username 
+    data['requestCreatedBy'] = request.user.username
     serializer = CreateRequestsSerializer(data=data, context={'request': request})
     
     if serializer.is_valid():
@@ -1175,9 +1174,22 @@ def handle_settle_bill_requests(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def create_proposal(request):
+    data = request.data
+    receiver_desg, receiver_user = data.get('designation').split('|')
     serializer = ProposalSerializer(data=request.data)
     if serializer.is_valid():
-        serializer.save(engineer=request.user)
+        file_id = create_file(
+            uploader=request.user.username,
+            uploader_designation=data.get('role'),
+            receiver=receiver_user,
+            receiver_designation=receiver_desg,
+            src_module="IWD",
+            src_object_id=str(data.get("id")),
+            file_extra_JSON={"value": 2},
+            attached_file=None
+        )
+        file_instance = File.objects.get(id=file_id)
+        proposal = serializer.save(created_by=request.user, file=file_instance)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

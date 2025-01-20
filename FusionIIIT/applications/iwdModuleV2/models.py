@@ -1,5 +1,7 @@
 from django.db import models
 from datetime import date
+#from django.contrib.auth.models import User
+from applications.filetracking.models import File
 
 # Create your models here.
 
@@ -199,7 +201,9 @@ class Budget(models.Model):
 
 class Proposal(models.Model):
     request = models.ForeignKey(Requests, on_delete=models.CASCADE, related_name='proposals')
-    engineer = models.CharField(max_length=200) #models.ForeignKey(User, on_delete=models.CASCADE)
+    created_by = models.CharField(max_length=200) #models.ForeignKey(User, on_delete=models.CASCADE)
+    file = models.ForeignKey(File, on_delete=models.CASCADE, null=True, blank=True)
+    proposal_budget = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
     supporting_documents = models.FileField(upload_to='proposals/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -208,5 +212,8 @@ class Proposal(models.Model):
 class Item(models.Model):
     proposal = models.ForeignKey('Proposal', on_delete=models.CASCADE, related_name='items')
     name = models.CharField(max_length=255)
-    cost = models.DecimalField(max_digits=10, decimal_places=2)
-    quantity = models.IntegerField()
+    description = models.TextField()
+    unit = models.CharField(max_length=50)
+    price_per_unit = models.DecimalField(max_digits=10, decimal_places=2)
+    total_price = models.DecimalField(max_digits=10, decimal_places=2)
+    docs = models.FileField(upload_to='items/', null=True, blank=True)
