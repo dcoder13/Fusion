@@ -200,20 +200,23 @@ class Budget(models.Model):
     budgetIssued = models.IntegerField(default=0)
 
 class Proposal(models.Model):
-    request = models.ForeignKey(Requests, on_delete=models.CASCADE, related_name='proposals')
-    created_by = models.CharField(max_length=200) #models.ForeignKey(User, on_delete=models.CASCADE)
+    request_id = models.ForeignKey(Requests, on_delete=models.CASCADE)
+    created_by = models.CharField(max_length=200)
     file = models.ForeignKey(File, on_delete=models.CASCADE, null=True, blank=True)
     proposal_budget = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
     supporting_documents = models.FileField(upload_to='proposals/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    status = models.CharField(max_length=20, choices=[('Pending', 'Pending'), ('Approved', 'Approved'), ('Rejected', 'Rejected')], default='Pending')
+    issuedWorkOrder = models.IntegerField(default=0)
+    workCompleted = models.IntegerField(default=0)
+    billGenerated = models.IntegerField(default=0)
+    billProcessed = models.IntegerField(default=0)
+    billSettled = models.IntegerField(default=0)
 
 class Item(models.Model):
-    proposal = models.ForeignKey('Proposal', on_delete=models.CASCADE, related_name='items')
+    proposal_id = models.ForeignKey('Proposal', on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     description = models.TextField()
     unit = models.CharField(max_length=50)
     price_per_unit = models.DecimalField(max_digits=10, decimal_places=2)
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
-    docs = models.FileField(upload_to='items/', null=True, blank=True)
